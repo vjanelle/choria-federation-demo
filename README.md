@@ -40,42 +40,6 @@ You need docker with docker compose, this probably only works on Linux and Macs.
 Setup?
 ======
 
-Run `./setup.sh` that will create many certificates, JWT tokens etc
-
-Run `docker-compose up --scale server.choria=10` to run 10 Choria servers.
-
-Run `docker-compose exec client.choria bash -l` to get a shell.
-
-Once in the shell do:
-
-```
-$ choria login
-? Username:  choria
-? Password:  ******
-Token saved to /home/choria/.choria/token
-```
-
-The password is `secret`.
-
-From there basics like `choria req choria_util info` will function until your
-JWT expire in a hour.
-
-The `choria` user above is a basic user, there's also an `admin` user with full
-access to all subjects on the broker.
-
-For example `choria` could not do `choria broker s backup CHORIA_EVENTS /tmp/events`
-while the `admin` user can.
-
-Autonomous Agents?
-==================
-
-The server instances are configured to support [Autonomous Agents](https://choria.io/docs/autoagents/)
-with an example in `config/server/machine/choria`, any others you add there will immediately
-activate without requiring restart of the nodes
-
-Choria Streams?
-===============
-
-[Choria Streams](https://choria.io/docs/streams/) is enabled by default and usable
-from the `admin` user.
-
+- run "./pki.sh" to setup the certs
+- `docker compose exec client.choria choria ping --debug`
+- watch it hang?
