@@ -1,58 +1,70 @@
 version: "3"
 services:
-  broker.choria:
-    hostname: broker.choria.local
+  broker.dmz:
+    hostname: broker-dmz.choria.local
     image: docker.io/choria/choria:${CHORIA_TAG}
     dns_search: choria.local
     command: broker run --config /etc/choria/broker/broker.conf
     volumes:
-      - ./config/broker:/etc/choria/broker
-      - ./credentials/broker:/etc/choria/credentials
+      - ./config/broker/dmz:/etc/choria/broker
+      - ./pki:/pki
     networks:
       - choria
 
-  provisioner.choria:
-    hostname: provisioner.choria.local
-    image: choria/provisioner:${PROV_TAG}
-    dns_search: choria
-    command: --config /etc/choria-provisioner/provisioner/provisioner.yaml --choria-config /etc/choria-provisioner/provisioner/choria.cfg
+  broker.east:
+    hostname: broker-east.choria.local
+    image: docker.io/choria/choria:${CHORIA_TAG}
+    dns_search: choria.local
+    command: broker run --config /etc/choria/broker/broker.conf
     volumes:
-      - ./config/provisioner:/etc/choria-provisioner/provisioner
-      - ./credentials/provisioner:/etc/choria-provisioner/credentials
-    environment:
-      - USER=choria
+      - ./config/broker/east:/etc/choria/broker
+      - ./pki:/pki
     networks:
       - choria
-    depends_on:
-      - broker.choria
 
-  server.choria:
+  broker.west:
+    hostname: broker-west.choria.local
+    image: docker.io/choria/choria:${CHORIA_TAG}
+    dns_search: choria.local
+    command: broker run --config /etc/choria/broker/broker.conf
+    volumes:
+      - ./config/broker/west:/etc/choria/broker
+      - ./pki:/pki
+    networks:
+      - choria
+
+  server.dmz:
+    image: docker.io/choria/choria:${CHORIA_TAG}
+    dns_search: choria.local
+    domainname: choria.local
+    command: server run --config /etc/choria/server.conf --debug
+    volumes:
+      - ./pki:/pki
+      - ./config/server/dmz:/etc/choria
+    networks:
+      - choria
+
+  server.east:
+    image: docker.io/choria/choria:${CHORIA_TAG}
+    dns_search: choria.local
+    domainname: choria.local
+    command: server run --config /etc/choria/server.conf --debug
+    volumes:
+      - ./pki:/pki
+      - ./config/server/east:/etc/choria
+    networks:
+      - choria
+
+  server.west:
     image: docker.io/choria/choria:${CHORIA_TAG}
     dns_search: choria.local
     domainname: choria.local
     command: server run --config /etc/choria/server.conf
     volumes:
-      - ./credentials/server/provisioning.jwt:/etc/choria/provisioning.jwt
-      - ./config/server/machine:/etc/choria/machine
+      - ./pki:/pki
+      - ./config/server/west:/etc/choria
     networks:
       - choria
-    depends_on:
-      - broker.choria
-
-  aaa.choria:
-    hostname: aaa.choria.local
-    image: choria/aaasvc:${AAA_TAG}
-    dns_search: choria.local
-    command: run --config /etc/aaasvc/aaa/aaa.conf
-    environment:
-      - USER=choria
-    volumes:
-      - ./config/aaa:/etc/aaasvc/aaa
-      - ./credentials/aaasvc:/etc/aaasvc/credentials
-    networks:
-      - choria
-    depends_on:
-      - broker.choria
 
   client.choria:
     hostname: client.choria.local
@@ -63,11 +75,31 @@ services:
     stdin_open: true
     tty: true
     volumes:
-      - ./config/client:/etc/choria
+      - ./pki:/pki
+      - ./config/client/client.conf:/home/choria/.choriarc
+    environment: 
+    - MCOLLECTIVE_CERTNAME=privileged.choria,
+    - MCOLLECTIVE_ROLE=privileged.choria,
+    - USER=choria
     networks:
       - choria
-    depends_on:
-      - broker.choria
 
+  client.east:
+    hostname: client.choria.local
+    image: docker.io/choria/choria:${CHORIA_TAG}
+    dns_search: choria.local
+    entrypoint: /bin/bash
+    command: "-l"
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./pki:/pki
+      - ./config/client/east/client.conf:/home/choria/.choriarc
+    environment: 
+    - MCOLLECTIVE_CERTNAME=privileged.choria,
+    - MCOLLECTIVE_ROLE=privileged.choria,
+    - USER=choria
+    networks:
+      - choria
 networks:
   choria: {}

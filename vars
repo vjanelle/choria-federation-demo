@@ -1,0 +1,8 @@
+set_var EASYRSA_REQ_COUNTRY    "CA"
+set_var EASYRSA_REQ_PROVINCE   "BC"
+set_var EASYRSA_REQ_CITY       "Vancouver"
+set_var EASYRSA_REQ_ORG        "Choria CA"
+set_var EASYRSA_REQ_EMAIL      "ignore@choria.io"
+set_var EASYRSA_REQ_OU         "Community"
+set_var EASYRSA_ALGO           "ec"
+set_var EASYRSA_DIGEST         "sha512"
